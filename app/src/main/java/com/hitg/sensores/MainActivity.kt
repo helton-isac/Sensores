@@ -8,32 +8,29 @@ import android.hardware.SensorManager
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import com.hitg.sensores.sensor.Shake
 
 class MainActivity : AppCompatActivity(), SensorEventListener {
 
     private lateinit var sensorManager: SensorManager
-    private lateinit var tempSensor: Sensor
+
+    private lateinit var shake: Shake
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        if (sensorManager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE) == null) {
-            Log.i("SENSOR", "SENSOR DE TEMPERATURA INDISPONÍVEL")
-        } else {
-            tempSensor = sensorManager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE)
-        }
+        shake = Shake(sensorManager)
     }
 
     override fun onResume() {
         super.onResume()
-        sensorManager.registerListener(this, tempSensor, SensorManager.SENSOR_DELAY_NORMAL)
+        shake.register(this)
     }
 
     override fun onPause() {
         super.onPause()
-        sensorManager.unregisterListener(this)
+        shake.unregisterListener(this)
     }
 
     private fun printSensors() {
@@ -46,9 +43,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     }
 
     override fun onSensorChanged(sensorEvent: SensorEvent?) {
-        sensorEvent?.let {
-            Log.i("Valor do sensor", it.values[0].toString())
-        }
+        shake.onSensorChanged(sensorEvent, this)
     }
 
     override fun onAccuracyChanged(sensorEvent: Sensor?, p1: Int) {
