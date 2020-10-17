@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Sensores</string>
+    <string name="sign_in">Sign In</string>
+    <string name="clique_no_bot_o_abaixo_para_realizar_o_login">Clique no botão abaixo para realizar o login</string>
+    <string name="entrar">Entrar</string>
+    <string name="entre_com_sua_digital">Entre com sua digital</string>
 </resources>

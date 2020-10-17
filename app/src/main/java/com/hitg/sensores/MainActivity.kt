@@ -8,19 +8,19 @@ import android.hardware.SensorManager
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import com.hitg.sensores.sensor.Shake
+import com.hitg.sensores.sensor.ShakeDetection
 
 class MainActivity : AppCompatActivity(), SensorEventListener {
 
     private lateinit var sensorManager: SensorManager
 
-    private lateinit var shake: Shake
+    private lateinit var shake: ShakeDetection
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        shake = Shake(sensorManager)
+        shake = ShakeDetection(sensorManager)
     }
 
     override fun onResume() {
