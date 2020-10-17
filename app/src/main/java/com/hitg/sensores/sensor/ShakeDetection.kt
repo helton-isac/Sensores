@@ -9,7 +9,7 @@ import android.util.Log
 import android.widget.Toast
 import kotlin.math.abs
 
-class Shake(private val sensorManager: SensorManager) {
+class ShakeDetection(private val sensorManager: SensorManager) {
 
 
     private lateinit var accelerometer: Sensor
