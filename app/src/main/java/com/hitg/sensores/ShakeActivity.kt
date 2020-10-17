@@ -1,27 +1,21 @@
-package com.hitg.sensores.sensor
+package com.hitg.sensores
 
 import android.content.Context
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import kotlin.math.abs
 
-class ShakeDetection(private val sensorManager: SensorManager) {
+class ShakeActivity : AppCompatActivity(), SensorEventListener {
 
+    private lateinit var sensorManager: SensorManager
 
     private lateinit var accelerometer: Sensor
-
-    init {
-        if (sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) == null) {
-            Log.i("SENSOR", "ACELEROMETRO INDISPONÍVEL")
-        } else {
-            accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-        }
-    }
-
 
     private var currentX: Float = 0.0f
     private var currentY: Float = 0.0f
@@ -39,18 +33,45 @@ class ShakeDetection(private val sensorManager: SensorManager) {
 
     private var itIsNotFirstTime = false
 
-    fun register(listener: SensorEventListener) {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_shake)
+        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        if (sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) == null) {
+            Log.i("SENSOR", "ACELEROMETRO INDISPONÍVEL")
+        } else {
+            accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+        }
+    }
+
+
+    override fun onResume() {
+        super.onResume()
         sensorManager.registerListener(
-            listener, accelerometer,
-            SensorManager.SENSOR_DELAY_NORMAL
+            this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL
         )
     }
 
-    fun unregisterListener(listener: SensorEventListener) {
-        sensorManager.unregisterListener(listener)
+    override fun onPause() {
+        super.onPause()
+        sensorManager.unregisterListener(this)
     }
 
-    fun onSensorChanged(sensorEvent: SensorEvent?, context: Context) {
+    private fun printSensors() {
+        val sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        val sensorList: List<Sensor> = sensorManager.getSensorList(Sensor.TYPE_ALL)
+        for (sensor in sensorList) {
+            Log.i(
+                "SENSOR",
+                "Nome: ${sensor.name} - Tipo ${sensor.type} - ${sensor.stringType} "
+            )
+        }
+    }
+
+    override fun onAccuracyChanged(sensorEvent: Sensor?, p1: Int) {
+    }
+
+    override fun onSensorChanged(sensorEvent: SensorEvent?) {
         sensorEvent?.let {
             currentX = it.values[0]
             currentY = it.values[1]
@@ -63,7 +84,7 @@ class ShakeDetection(private val sensorManager: SensorManager) {
                     (xDifference > shakeThreshold && zDifference > shakeThreshold) ||
                     (yDifference > shakeThreshold && zDifference > shakeThreshold)
                 ) {
-                    Toast.makeText(context, "Shake", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Shake", Toast.LENGTH_SHORT).show()
                 }
             }
             lastX = currentX

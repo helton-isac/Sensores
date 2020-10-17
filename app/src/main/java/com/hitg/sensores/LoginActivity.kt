@@ -55,7 +55,9 @@ class LoginActivity : AppCompatActivity() {
                         result: BiometricPrompt.AuthenticationResult
                     ) {
                         super.onAuthenticationSucceeded(result)
-                        startActivity(Intent(this@LoginActivity, MainActivity::class.java))
+                        startActivity(
+                            Intent(this@LoginActivity, MainActivity::class.java)
+                        )
                         finish()
                     }
 
