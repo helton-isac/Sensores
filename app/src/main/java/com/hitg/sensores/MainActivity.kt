@@ -13,12 +13,19 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import kotlinx.android.synthetic.main.activity_main.*
+import java.util.*
 
 class MainActivity : AppCompatActivity(), SensorEventListener {
     private lateinit var sensorManager: SensorManager
+
     private lateinit var stepCounter: Sensor
     private lateinit var stepDetector: Sensor
+
     private var stepDetect = 0
+
+    private lateinit var mStepsDBHelper: StepsDBHelper
+    private lateinit var mStepCountList: ArrayList<Step>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,9 +34,39 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
 
         checkPermissions()
+
+        ivRefresh.setOnClickListener {
+            initList()
+        }
+        wlvSteps.setAnimDuration(10000)
+    }
+
+    private fun initList() {
+        mStepsDBHelper = StepsDBHelper(this)
+        mStepCountList = mStepsDBHelper.readStepsEntries()
+        val mCalendar = Calendar.getInstance()
+        val todayDate =
+            (mCalendar.get(Calendar.DAY_OF_MONTH)
+                .toString() + "/" + (mCalendar.get(Calendar.MONTH) + 1).toString()
+                    + "/" + mCalendar.get(Calendar.YEAR).toString())
+        if (mStepCountList.size > 0) {
+            if (todayDate == mStepCountList[0].mDate) {
+                stepDetect = mStepCountList[0].mStepCount
+                setUpTodayStep()
+            }
+        } else {
+            setUpTodayStep()
+        }
+        lvSteps.adapter = StepsListAdapter(this, mStepCountList)
+    }
+
+    private fun setUpTodayStep() {
+        wlvSteps.progressValue = (stepDetect * 100) / 6000
+        wlvSteps.centerTitle = stepDetect.toString()
     }
 
     private fun initSensors() {
+        initList()
         initStepCounter()
         initStepDetect()
     }
@@ -54,17 +91,12 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         p0?.let {
             when (it.sensor) {
                 stepCounter -> {
-                    Log.i("STEP", p0.values[0].toString())
                     //tvCounted.text = it.values[0].toString()
                 }
                 stepDetector -> {
+                    StepsDBHelper(this).createStepsEntry()
                     stepDetect += it.values[0].toInt()
-
-                    Log.i("STEP", p0.values[0].toString())
-                    //tvDetected.text = stepDetect.toString()
-                }
-                else -> {
-
+                    setUpTodayStep()
                 }
             }
         }
